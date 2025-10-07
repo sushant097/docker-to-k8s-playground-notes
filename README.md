@@ -1,6 +1,12 @@
-# 🐳 Kubernetes & Docker Guide
 
-A practical, step-by-step guide to learning **Docker** and **Kubernetes**, including local cluster setup with **Minikube**, container management, pod access, deployments, scaling, rollouts, and debugging techniques — all documented while learning.
+# ☸️ Docker to Kubernetes Playground Notes
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Made with ❤️](https://img.shields.io/badge/Made%20with-%E2%9D%A4-red.svg)](#)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.30-blue?logo=kubernetes)](https://kubernetes.io/)
+[![Docker](https://img.shields.io/badge/Docker-blue?logo=docker)](https://www.docker.com/)
+
+> 📘 A practical, step-by-step learning guide for **Docker** and **Kubernetes**, including local setup with **Minikube**, managing containers, working with Pods, Deployments, Services, scaling, rollouts, and debugging — all documented while learning.
 
 > 📌 Ideal for beginners & intermediate DevOps learners who want a clean reference to revisit.
 
@@ -326,6 +332,18 @@ k apply -f deployment.yaml
 * 🚀 Use `kubectl apply --dry-run` for safe testing before deploying.
 
 ---
+
+## 🛣️ Learning Roadmap
+
+- [x] ✅ Docker basics (build, run, cleanup)
+- [x] ✅ Minikube setup on Mac (Docker driver)
+- [x] ✅ Basic kubectl commands (pods, deployments, services)
+- [x] ✅ Port-forwarding & dashboards
+- [ ] ⏳ Ingress + TLS setup
+- [ ] ⏳ Helm basics
+- [ ] ⏳ StatefulSets & Persistent Volumes
+- [ ] ⏳ CI/CD Integration (GitHub Actions)
+
 
 ## 📜 License
 
