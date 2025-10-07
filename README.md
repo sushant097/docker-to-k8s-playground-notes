@@ -1,6 +1,6 @@
 # 🐳 Kubernetes & Docker Guide
 
-A practical, step-by-step guide to learning **Docker** and **Kubernetes**, including local cluster setup with **Minikube**, container management, pod access, deployments, and debugging techniques — all documented while learning.
+A practical, step-by-step guide to learning **Docker** and **Kubernetes**, including local cluster setup with **Minikube**, container management, pod access, deployments, scaling, rollouts, and debugging techniques — all documented while learning.
 
 > 📌 Ideal for beginners & intermediate DevOps learners who want a clean reference to revisit.
 
@@ -16,20 +16,21 @@ A practical, step-by-step guide to learning **Docker** and **Kubernetes**, inclu
 6. [💻 Connecting to Pods (kubectl exec / SSH)](#-connecting-to-pods-kubectl-exec--ssh)
 7. [🌐 Port Forwarding & Exposing Services](#-port-forwarding--exposing-services)
 8. [⚡ Useful Commands](#-useful-commands)
-9. [🧠 Notes & Tips](#-notes--tips)
-10. [📜 License](#-license)
+9. [🧠 Advanced Kubernetes Commands](#-advanced-kubernetes-commands)
+10. [🧠 Notes & Tips](#-notes--tips)
+11. [📜 License](#-license)
 
 ---
 
 ## 🚀 Getting Started
 
-This repo documents the **key concepts and practical commands** for working with containers and Kubernetes clusters on macOS (works similarly on Linux).  
+This repo documents the **key concepts and practical commands** for working with containers and Kubernetes clusters on macOS (works similarly on Linux).
 
 Before diving in, make sure you have:
 
-- 🐳 **Docker** installed → [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- ☸️ **Minikube** & **kubectl** installed (see below)
-- 🧠 A basic understanding of terminal commands
+* 🐳 **Docker** installed → [Docker Desktop](https://www.docker.com/products/docker-desktop)
+* ☸️ **Minikube** & **kubectl** installed (see below)
+* 🧠 A basic understanding of terminal commands
 
 ---
 
@@ -38,18 +39,18 @@ Before diving in, make sure you have:
 ### 🔸 Build and run images
 
 ```bash
-# Build an image
+# Build an image from Dockerfile
 docker build -t myapp .
 
-# Run a container
+# Run a container in background
 docker run -d -p 8080:80 myapp
 
-# List containers
+# List running containers
 docker ps
 
 # Exec into a running container
 docker exec -it <container_id> /bin/bash
-````
+```
 
 ### 🔸 Clean up
 
@@ -69,10 +70,12 @@ Kubernetes (K8s) lets you **orchestrate containers** — deploy, scale, and mana
 Key objects:
 
 * **Pod** → Smallest deployable unit (runs containers)
-* **Deployment** → Manages Pods, scaling, and updates
+* **Deployment** → Manages Pods, scaling, and rolling updates
+* **ReplicaSet** → Ensures the desired number of Pods
 * **Service** → Exposes Pods internally or externally
 * **Ingress** → Routes HTTP traffic to services
-* **ConfigMap / Secret** → Inject config & secrets
+* **ConfigMap / Secret** → Store config & sensitive data
+* **Namespace** → Logical grouping of resources
 
 ---
 
@@ -141,7 +144,7 @@ Kubernetes doesn’t run SSH by default. But you can:
 
 1. Install OpenSSH inside a pod.
 2. Forward port 22 locally.
-3. SSH from Mac to localhost.
+3. SSH from your Mac to localhost.
 
 ```bash
 kubectl run ssh-pod --image=ubuntu --restart=Never --command -- sleep infinity
@@ -177,21 +180,137 @@ This opens the service in your browser automatically.
 ## ⚡ Useful Commands
 
 ```bash
-# Check cluster info
+# Cluster info & nodes
 kubectl cluster-info
+kubectl get nodes
 
-# Get all resources
+# List resources
 kubectl get all
+kubectl get pods -o wide
+kubectl get deployments
+kubectl get services
 
-# Describe a resource
+# Describe resources
 kubectl describe pod <pod-name>
+kubectl describe deployment <deployment-name>
 
-# Apply or delete YAML
+# Apply & delete manifests
 kubectl apply -f deployment.yaml
 kubectl delete -f deployment.yaml
 
-# Access Minikube dashboard
+# Minikube dashboard
 minikube dashboard
+```
+
+---
+
+## 🧠 Advanced Kubernetes Commands
+
+### 📌 **Namespaces**
+
+```bash
+# List namespaces
+kubectl get ns
+
+# Create a namespace
+kubectl create ns dev
+
+# Apply resources in a specific namespace
+kubectl apply -f app.yaml -n dev
+
+# Switch context temporarily
+kubectl get pods -n kube-system
+```
+
+---
+
+### 🧰 **Logs & Troubleshooting**
+
+```bash
+# View pod logs
+kubectl logs <pod-name>
+
+# View logs of specific container in a pod
+kubectl logs <pod-name> -c <container-name>
+
+# Follow logs (like tail -f)
+kubectl logs -f <pod-name>
+
+# Describe a failing pod
+kubectl describe pod <pod-name>
+
+# Check cluster events
+kubectl get events --sort-by=.metadata.creationTimestamp
+```
+
+---
+
+### 📈 **Scaling & Rollouts**
+
+```bash
+# Scale a deployment
+kubectl scale deployment myapp --replicas=3
+
+# Check rollout status
+kubectl rollout status deployment/myapp
+
+# Rollout history
+kubectl rollout history deployment/myapp
+
+# Rollback
+kubectl rollout undo deployment/myapp
+```
+
+---
+
+### 🔄 **Resource Management**
+
+```bash
+# Get CPU & memory usage (requires metrics server)
+kubectl top nodes
+kubectl top pods
+
+# Delete resources
+kubectl delete pod <pod-name>
+kubectl delete deployment <deployment-name>
+kubectl delete svc <service-name>
+
+# Delete all resources in namespace
+kubectl delete all --all -n dev
+```
+
+---
+
+### 🧪 **YAML Debugging & Dry Runs**
+
+```bash
+# Generate manifest without applying
+kubectl create deployment myapp --image=nginx --dry-run=client -o yaml > deployment.yaml
+
+# Validate YAML before applying
+kubectl apply -f deployment.yaml --dry-run=server
+```
+
+---
+
+### 🧠 **Aliases (Optional)**
+
+You can add these to `~/.zshrc` or `~/.bashrc` for convenience:
+
+```bash
+alias k='kubectl'
+alias kgp='kubectl get pods'
+alias kga='kubectl get all'
+alias kdp='kubectl describe pod'
+alias kaf='kubectl apply -f'
+alias kdf='kubectl delete -f'
+```
+
+Then you can do:
+
+```bash
+k get pods
+k apply -f deployment.yaml
 ```
 
 ---
@@ -199,10 +318,12 @@ minikube dashboard
 ## 🧠 Notes & Tips
 
 * ✅ **`kubectl exec` > SSH** — Pods are ephemeral; SSH is not the norm.
-* 🧰 Use `kubectl logs <pod>` for debugging containers.
+* 🧰 Use `kubectl logs <pod>` and `kubectl describe` for debugging containers.
 * 🌱 Minikube + Docker gives a near-production environment locally.
 * 💡 If a pod doesn't have Bash, use `sh`.
+* 🌀 Use namespaces to keep environments isolated (e.g., dev, staging).
 * 🔒 Avoid running SSH servers in production pods unless absolutely needed.
+* 🚀 Use `kubectl apply --dry-run` for safe testing before deploying.
 
 ---
 
@@ -216,5 +337,3 @@ This project is licensed under the [MIT License](LICENSE).
 
 Maintained by [Sushant Gautam](https://github.com/sushant097)
 Learning DevOps & Cloud — documenting every step 🚀
-
-```
